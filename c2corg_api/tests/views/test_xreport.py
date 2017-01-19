@@ -80,6 +80,7 @@ class TestXreportRest(BaseDocumentTestRest):
         self.assertIn('articles', associations)
         self.assertIn('outings', associations)
         self.assertIn('routes', associations)
+        self.assertNotIn('waypoints', associations)
 
         linked_images = associations.get('images')
         self.assertEqual(len(linked_images), 0)

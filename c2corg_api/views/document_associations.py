@@ -34,7 +34,7 @@ associations_to_include = {
          'books', 'xreports'},
     AREA_TYPE: {'images'},
     BOOK_TYPE: {'routes', 'articles', 'images', 'waypoints'},
-    XREPORT_TYPE: {'waypoints', 'users', 'routes', 'outings', 'articles',
+    XREPORT_TYPE: {'users', 'routes', 'outings', 'articles',
                    'images'},
     USERPROFILE_TYPE: {'images'}
 }
