@@ -15,6 +15,7 @@ class InitFeed(MigrateBase):
             self.session_target.execute(SQL_DOCUMENT_CREATE_CHANGE)
             self.session_target.execute(SQL_AREAS_FOR_CHANGES)
             self.session_target.execute(SQL_ACTIVITIES_FOR_CHANGES)
+            self.session_target.exececute(SQL_LANGUAGES_FOR_CHANGES)
             self.session_target.execute(SQL_CREATION_USER)
             self.session_target.execute(SQL_OUTING_PARTICIPANTS)
             zope.sqlalchemy.mark_changed(self.session_target)
@@ -60,6 +61,20 @@ update guidebook.feed_document_changes as c
 set area_ids = ac.area_ids
 from areas_for_documents ac
 where ac.change_id = c.change_id;
+"""
+
+
+# set activities for outings and routes
+SQL_LANGUAGES_FOR_CHANGES = """
+with languages_for_documents as (
+  select c.change_id, array_agg(dl.lang) lang_ids
+  from guidebook.feed_document_changes c join guidebook.documents_locales dl
+    on c.document_id = dl.document_id
+  group by c.change_id
+update guidebook.feed_document_changes as c
+set lang_ids = ac.lang_ids
+from languages_for_documents lc
+where dl.change_id = c.change_id;
 """
 
 

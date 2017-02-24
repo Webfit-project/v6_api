@@ -137,6 +137,9 @@ class DocumentChange(Base):
     activities = Column(
         ArrayOfEnum(enums.activity_type), nullable=False, server_default='{}')
 
+    # enums.default_lang ... OR ... ARRAY(String)
+    lang_ids = Column(enums.default_lang, nullable=False, server_default='{}')
+
     # For performance reasons, areas and users are referenced in simple integer
     # arrays in 'feed_document_changes', no PK-FK relations are set up.
     # To prevent inconsistencies, triggers are used.
@@ -178,6 +181,7 @@ class DocumentChange(Base):
         copy.document_id = self.document_id
         copy.document_type = self.document_type
         copy.change_type = self.change_type
+        copy.lang_ids = self.lang_ids
         copy.activities = self.activities
         copy.area_ids = self.area_ids
         if copy.document_type == OUTING_TYPE:
@@ -198,6 +202,9 @@ def update_feed_document_create(document, user_id):
     # users can be queried
     DBSession.flush()
 
+    lang_ids = []
+    lang_ids = document.available_langs
+
     activities = []
     if document.type in [ARTICLE_TYPE, OUTING_TYPE, ROUTE_TYPE]:
         activities = document.activities
@@ -217,6 +224,7 @@ def update_feed_document_create(document, user_id):
         document_id=document.document_id,
         document_type=document.type,
         activities=activities,
+        lang_ids=lang_ids,
         area_ids=area_ids,
         user_ids=user_ids
     )
@@ -227,6 +235,7 @@ def update_feed_document_create(document, user_id):
 def update_feed_document_update(document, user_id, update_types):
     """Update the feed entry for a document:
 
+    - update `lang_ids` if the locales have changed.
     - update `area_ids` if the geometry has changed.
     - update `activities` if figures have changed.
     - update `user_ids` if the document is an outing and the participants
@@ -445,6 +454,16 @@ def update_activities_of_changes(document):
         DocumentChange.__table__.update().
         where(DocumentChange.document_id == document.document_id).
         values(activities=document.activities)
+    )
+
+
+def update_activities_of_changes(document):
+    """Update the langs of all feed entries of the given document.
+    """
+    DBSession.execute(
+        DocumentChange.__table__.update().
+        where(DocumentChange.document_id == document.document_id).
+        values(lang_ids=document.lang_ids)
     )
 
 

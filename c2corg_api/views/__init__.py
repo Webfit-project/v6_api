@@ -177,6 +177,9 @@ def set_best_locale(documents, preferred_lang, expunge=True):
 
 
 def get_best_locale(available_locales, preferred_lang):
+
+    print(' LOOOOOOOOOOOOOOOOOOOOOOOG ', preferred_lang, available_locales)
+
     if preferred_lang in available_locales:
         best_locale = available_locales[preferred_lang]
     else:

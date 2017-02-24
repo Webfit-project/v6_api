@@ -23,12 +23,14 @@ class TestDocumentChange(BaseTestCase):
         self.session.add_all([self.waypoint, self.area1, self.area2])
         self.session.flush()
 
-    def test_check_user_and_area_ids_on_create_valid(self):
+    def test_check_ids_on_create_valid(self):
         users_ids = [self.user1.id, self.user2.id]
         area_ids = [self.area1.document_id, self.area2.document_id]
+        # lang_ids = ['de', 'it']
         change = DocumentChange(
             user=self.user1, change_type='created', document=self.waypoint,
-            document_type=WAYPOINT_TYPE, area_ids=area_ids, user_ids=users_ids
+            document_type=WAYPOINT_TYPE,
+            area_ids=area_ids, user_ids=users_ids, lang_ids=[]
         )
         self.session.add(change)
         self.session.flush()
@@ -40,7 +42,8 @@ class TestDocumentChange(BaseTestCase):
         users_ids = [self.user1.id, -12345678]
         change = DocumentChange(
             user=self.user1, change_type='created', document=self.waypoint,
-            document_type=WAYPOINT_TYPE, area_ids=[], user_ids=users_ids
+            document_type=WAYPOINT_TYPE,
+            area_ids=[], user_ids=users_ids, lang_ids=[]
         )
         try:
             self.session.add(change)
@@ -66,13 +69,30 @@ class TestDocumentChange(BaseTestCase):
         else:
             self.fail('invalid area id not detected')
 
+    def test_check_lang_ids_on_create_invalid(self):
+        """try to create a "change" with an invalid lang id
+        """
+
+        change = DocumentChange(
+            user=self.user1, change_type='created', document=self.waypoint,
+            document_type=WAYPOINT_TYPE,
+            area_ids=[], user_ids=[], lang_ids=['fr', 'en', 'ru']
+        )
+        try:
+            self.session.add(change)
+            self.session.flush()
+        except Exception as exc:
+            self.assertTrue('Invalid lang id: ru' in exc.orig.pgerror)
+        else:
+            self.fail('invalid lang id not detected')
+
     def test_check_user_ids_on_update_invalid(self):
         """try to update a "change" with an invalid user id
         """
         # first create the change without user ids
         change = DocumentChange(
             user=self.user1, change_type='created', document=self.waypoint,
-            document_type=WAYPOINT_TYPE, area_ids=[], user_ids=[]
+            document_type=WAYPOINT_TYPE, area_ids=[], user_ids=[], lang_ids=[]
         )
         self.session.add(change)
         self.session.flush()

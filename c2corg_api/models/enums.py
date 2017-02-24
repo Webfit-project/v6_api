@@ -126,6 +126,8 @@ book_type = enum(
     'book_type', attributes.book_types)
 feed_change_type = enum(
     'feed_change_type', attributes.feed_change_types)
+default_lang = enum(
+    'default_lang', attributes.langs_priority)
 event_type = enum(
     'event_type', attributes.event_types)
 author_status = enum(
