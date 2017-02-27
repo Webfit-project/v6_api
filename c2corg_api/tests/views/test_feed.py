@@ -228,6 +228,24 @@ class TestPersonalFeedRest(BaseFeedTestRest):
         self.assertEqual(
             self.route.document_id, feed[0]['document']['document_id'])
 
+    def test_get_feed_languages_filter(self):
+        """ Get personal feed with an language filter.
+        """
+        # set an activity filter for the user
+        user = self.session.query(User).get(self.global_userids['contributor'])
+        user.feed_filter_lang_preferences = ['es', 'it']
+        self.session.flush()
+
+        headers = self.add_authorization_header(username='contributor')
+        response = self.app.get('/personal-feed', status=200, headers=headers)
+        body = response.json
+
+        feed = body['feed']
+        self.assertEqual(1, len(feed))
+
+        self.assertEqual(
+            self.route.document_id, feed[0]['document']['document_id'])
+
     def test_get_feed_areas_filter(self):
         """ Get personal feed with an area filter.
         """

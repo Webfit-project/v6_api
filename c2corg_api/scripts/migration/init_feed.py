@@ -64,17 +64,18 @@ where ac.change_id = c.change_id;
 """
 
 
-# set activities for outings and routes
+# set lang_ids for all document types
 SQL_LANGUAGES_FOR_CHANGES = """
 with languages_for_documents as (
   select c.change_id, array_agg(dl.lang) lang_ids
   from guidebook.feed_document_changes c join guidebook.documents_locales dl
     on c.document_id = dl.document_id
   group by c.change_id
+)
 update guidebook.feed_document_changes as c
-set lang_ids = ac.lang_ids
+set lang_ids = lc.lang_ids::guidebook.default_lang[]
 from languages_for_documents lc
-where dl.change_id = c.change_id;
+where lc.change_id = c.change_id;
 """
 
 

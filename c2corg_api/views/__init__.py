@@ -168,6 +168,9 @@ def set_best_locale(documents, preferred_lang, expunge=True):
         if expunge and not inspect(document).detached:
             DBSession.expunge(document)
 
+        if not document.locales:
+            return
+
         if document.locales:
             available_locales = {
                 locale.lang: locale for locale in document.locales}
@@ -180,12 +183,18 @@ def get_best_locale(available_locales, preferred_lang):
 
     print(' LOOOOOOOOOOOOOOOOOOOOOOOG ', preferred_lang, available_locales)
 
-    if preferred_lang in available_locales:
-        best_locale = available_locales[preferred_lang]
-    else:
+    if type(preferred_lang) is list:
         best_locale = next(
-                (available_locales[lang] for lang in langs_priority
-                 if lang in available_locales), None)
+            (available_locales[lang] for lang in langs_priority
+             if lang in available_locales and lang in preferred_lang), None)
+
+    else:
+        if preferred_lang in available_locales:
+            best_locale = available_locales[preferred_lang]
+        else:
+            best_locale = next(
+                    (available_locales[lang] for lang in langs_priority
+                     if lang in available_locales), None)
     return best_locale
 
 

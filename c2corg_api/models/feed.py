@@ -5,7 +5,8 @@ from c2corg_api.models.area import Area, AREA_TYPE
 from c2corg_api.models.area_association import AreaAssociation
 from c2corg_api.models.article import ARTICLE_TYPE
 from c2corg_api.models.association import Association
-from c2corg_api.models.document import Document, UpdateType
+from c2corg_api.models.book import BOOK_TYPE
+from c2corg_api.models.document import Document, UpdateType, DocumentLocale
 from c2corg_api.models.enums import feed_change_type
 from c2corg_api.models.image import Image, IMAGE_TYPE
 from c2corg_api.models.outing import OUTING_TYPE
@@ -13,6 +14,7 @@ from c2corg_api.models.route import ROUTE_TYPE
 from c2corg_api.models.user import User
 from c2corg_api.models.user_profile import USERPROFILE_TYPE
 from c2corg_api.models.utils import ArrayOfEnum
+from c2corg_api.models.xreport import XREPORT_TYPE
 from c2corg_api.views.validation import association_keys
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql.array import ARRAY
@@ -138,7 +140,8 @@ class DocumentChange(Base):
         ArrayOfEnum(enums.activity_type), nullable=False, server_default='{}')
 
     # enums.default_lang ... OR ... ARRAY(String)
-    lang_ids = Column(enums.default_lang, nullable=False, server_default='{}')
+    lang_ids = Column(
+        ArrayOfEnum(enums.default_lang), nullable=False, server_default='{}')
 
     # For performance reasons, areas and users are referenced in simple integer
     # arrays in 'feed_document_changes', no PK-FK relations are set up.
@@ -259,9 +262,13 @@ def update_feed_document_update(document, user_id, update_types):
         update_areas_of_changes(document)
 
     # updates activities
-    if document.type in [ARTICLE_TYPE, OUTING_TYPE, ROUTE_TYPE] and \
+    if document.type in [ARTICLE_TYPE, OUTING_TYPE, ROUTE_TYPE,
+                         BOOK_TYPE, XREPORT_TYPE] and \
             UpdateType.FIGURES in update_types:
         update_activities_of_changes(document)
+
+    # update lang_ids
+    update_languages_of_changes(document)
 
     # update users_ids/participants (only for outings)
     if document.type != OUTING_TYPE:
@@ -457,13 +464,21 @@ def update_activities_of_changes(document):
     )
 
 
-def update_activities_of_changes(document):
+def update_languages_of_changes(document):
     """Update the langs of all feed entries of the given document.
     """
+
+    lang_ids = DBSession. \
+        query(func.array_agg(DocumentLocale.lang,
+                             type_=postgresql.ARRAY(String))). \
+        filter(DocumentLocale.document_id == document.document_id). \
+        group_by(DocumentLocale.document_id). \
+        scalar()
+
     DBSession.execute(
         DocumentChange.__table__.update().
         where(DocumentChange.document_id == document.document_id).
-        values(lang_ids=document.lang_ids)
+        values(lang_ids=lang_ids)
     )
 
 

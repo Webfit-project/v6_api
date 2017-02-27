@@ -55,7 +55,7 @@ class FeedRest(object):
 
         """
         lang, token_id, token_time, limit = get_params(self.request)
-        changes = get_changes_of_feed(token_id, token_time, limit)  #lang
+        changes = get_changes_of_feed(token_id, token_time, limit)
         return load_feed(changes, lang)
 
 
@@ -201,7 +201,8 @@ def create_personal_filter(user):
     # filter on area and activity (`and` connected)
     area_activity_language_filter = None
 
-    if user.feed_filter_activities or user.has_area_filter:
+    if user.feed_filter_activities or user.has_area_filter or \
+            user.feed_filter_lang_preferences is not None:
         area_filter = create_area_filter(user)
         activity_filter = create_activity_filter(user)
         language_filter = create_language_filter(user)
