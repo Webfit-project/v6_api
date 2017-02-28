@@ -83,21 +83,24 @@ class BaseFeedTestRest(BaseTestRest):
             user_id=contributor_id, change_type='created',
             document_id=self.waypoint1.document_id,
             document_type=WAYPOINT_TYPE, user_ids=[contributor_id],
-            area_ids=[self.area1.document_id], lang_ids=[]
+            area_ids=[self.area1.document_id]
+            # , lang_ids=[]
         ))
         self.session.add(DocumentChange(
             time=datetime.datetime(2016, 1, 1, 12, 0, 0),
             user_id=contributor2_id, change_type='created',
             document_id=self.waypoint2.document_id,
             document_type=WAYPOINT_TYPE, user_ids=[contributor2_id],
-            area_ids=[self.area2.document_id], lang_ids=[]
+            area_ids=[self.area2.document_id]
+            # , lang_ids=[]
         ))
         self.session.add(DocumentChange(
             time=datetime.datetime(2016, 1, 1, 12, 1, 0),
             user_id=contributor_id, change_type='created',
             document_id=self.route.document_id,
             document_type=ROUTE_TYPE, user_ids=[contributor_id],
-            activities=['hiking'], lang_ids=[],
+            activities=['hiking'],
+            # , lang_ids=[],
             area_ids=[self.area1.document_id, self.area2.document_id]
         ))
         self.session.add(DocumentChange(
@@ -106,7 +109,8 @@ class BaseFeedTestRest(BaseTestRest):
             document_id=self.outing.document_id,
             document_type=OUTING_TYPE,
             user_ids=[contributor_id, contributor2_id],
-            activities=['skitouring'], lang_ids=[]
+            activities=['skitouring']
+            # , lang_ids=[]
         ))
         self.session.flush()
 

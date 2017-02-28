@@ -67,6 +67,8 @@ def validate_pref_lang_(lang, request):
             for lang in langs:
                 if lang in default_langs:
                     validated.append(lang)
+                else:
+                    request.errors.add('querystring', 'lang', 'invalid lang')
         elif lang in default_langs:
             validated.append(lang)
 

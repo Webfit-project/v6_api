@@ -205,8 +205,7 @@ def update_feed_document_create(document, user_id):
     # users can be queried
     DBSession.flush()
 
-    lang_ids = []
-    lang_ids = document.available_langs
+    lang_ids = [document.available_langs]
 
     activities = []
     if document.type in [ARTICLE_TYPE, OUTING_TYPE, ROUTE_TYPE]:
